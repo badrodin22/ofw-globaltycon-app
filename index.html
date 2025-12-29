@@ -5,314 +5,205 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>OFW Global Tycoon</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #fbbf24;
-            --bg: #0f172a;
-            --card: #1e293b;
-            --text: #f8fafc;
+        :root { 
+            --primary: #00f2ff; /* Neon Cyan */
+            --accent: #fbbf24; /* Gold */
+            --bg: #05070a; 
+            --card: rgba(255, 255, 255, 0.08); 
         }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text);
+        body { 
+            background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            color: #fff;
             font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             text-align: center;
-            user-select: none;
             overflow: hidden;
+            height: 100vh;
         }
 
-        .header {
-            padding: 20px;
-            background: rgba(30, 41, 59, 0.5);
-            border-bottom: 2px solid var(--card);
+        /* Top Bar */
+        .top-nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 20px;
+            background: rgba(0,0,0,0.6);
+        }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-avatar { width: 35px; height: 35px; border-radius: 50%; border: 1px solid var(--primary); background: #1e293b; }
+
+        /* Stats & Level Bar */
+        .main-stats { margin-top: 10px; }
+        .balance { font-size: 3rem; font-weight: 900; color: #fff; text-shadow: 0 0 15px var(--primary); }
+        
+        .level-container { width: 80%; margin: 10px auto; text-align: left; font-size: 0.7rem; }
+        .level-bar-bg { width: 100%; height: 6px; background: #334155; border-radius: 10px; margin-top: 5px; overflow: hidden; }
+        .level-bar-fill { height: 100%; width: 30%; background: linear-gradient(90deg, var(--primary), #a855f7); }
+
+        .sub-stats { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
+        .stat-card { background: var(--card); padding: 10px 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); flex: 1; max-width: 130px; }
+        .stat-card small { display: block; font-size: 0.6rem; color: #94a3b8; }
+        .stat-card b { color: var(--primary); font-size: 0.9rem; }
+
+        /* Main Character Area */
+        .game-area { height: 40vh; display: flex; align-items: center; justify-content: center; position: relative; }
+        .main-img { 
+            width: 220px; cursor: pointer; transition: transform 0.05s;
+            filter: drop-shadow(0 0 40px rgba(0,242,255,0.4));
+        }
+        .main-img:active { transform: scale(0.92); }
+
+        /* Welcome Popup */
+        #welcome-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 9999;
+            flex-direction: column; align-items: center; justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+        .popup-card {
+            background: #111827; width: 80%; padding: 40px 20px; border-radius: 30px; 
+            border: 1px solid var(--primary); text-align: center;
+        }
+        .claim-btn {
+            background: #fff; color: #000; border: none; padding: 15px; width: 100%;
+            border-radius: 50px; font-weight: 900; margin-top: 20px; cursor: pointer;
         }
 
-        .balance-container {
-            margin: 20px 0;
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%; background: #0a0f18;
+            padding: 15px 10px 30px 10px; border-radius: 25px 25px 0 0; box-sizing: border-box;
         }
+        .energy-box { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding: 0 10px; }
+        .energy-bar-bg { flex: 1; height: 12px; background: #1e293b; border-radius: 20px; overflow: hidden; }
+        .energy-bar-fill { height: 100%; width: 100%; background: var(--accent); transition: width 0.3s; }
 
-        .balance {
-            font-size: 3.5rem;
-            font-weight: 800;
-            color: var(--primary);
-            text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
-        }
+        .menu-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+        .menu-btn { font-size: 0.65rem; color: #64748b; cursor: pointer; }
+        .menu-btn span { display: block; font-size: 1.4rem; margin-bottom: 3px; filter: grayscale(1); }
+        .menu-btn.active { color: #fff; }
+        .menu-btn.active span { filter: grayscale(0); }
 
-        .income-info {
-            font-size: 0.9rem;
-            color: #10b981;
-            font-weight: 600;
-        }
-
-        /* Clicker Area */
-        .clicker-area {
-            height: 45vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .main-btn {
-            width: 250px;
-            height: 250px;
-            background: linear-gradient(145deg, #1e293b, #334155);
-            border: 10px solid var(--primary);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 50px rgba(0,0,0,0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 6rem;
-            transition: transform 0.05s;
-            position: relative;
-        }
-
-        .main-btn:active { transform: scale(0.9); }
-
-        /* Stats & Energy */
-        .stats-footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: var(--card);
-            border-radius: 25px 25px 0 0;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .energy-container {
-            margin-bottom: 20px;
-        }
-
-        .energy-bar-bg {
-            width: 100%;
-            height: 12px;
-            background: #334155;
-            border-radius: 6px;
-            overflow: hidden;
-            margin-top: 5px;
-        }
-
-        .energy-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #fbbf24, #f59e0b);
-            width: 100%;
-            transition: width 0.3s ease;
-        }
-
-        .nav-menu {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-
-        .nav-item {
-            background: rgba(255,255,255,0.05);
-            padding: 10px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            border: 1px solid transparent;
-        }
-
-        .nav-item:active { border-color: var(--primary); }
-
-        /* Shop Modal */
-        #shop-modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg);
-            z-index: 100;
-            padding: 20px;
-            box-sizing: border-box;
-            overflow-y: auto;
-        }
-
-        .shop-item {
-            background: var(--card);
-            margin-bottom: 10px;
-            padding: 15px;
-            border-radius: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid #334155;
-        }
-
-        .buy-btn {
-            background: var(--primary);
-            color: #000;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-weight: bold;
-        }
+        @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-100px); opacity: 0; } }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div id="rank">Trainee OFW ✈️</div>
-    </div>
-
-    <div class="balance-container">
-        <div class="balance">₱ <span id="balance">0</span></div>
-        <div class="income-info" id="pps-display">Sahod: +₱0/sec</div>
-    </div>
-
-    <div class="clicker-area">
-        <div class="main-btn" id="clicker">💼</div>
-    </div>
-
-    <div class="stats-footer">
-        <div class="energy-container">
-            <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
-                <span>Lakas (Energy)</span>
-                <span id="energy-text">100/100</span>
+    <div id="welcome-overlay">
+        <div class="popup-card">
+            <h2 style="margin:0;">Welcome Back!</h2>
+            <p style="color: #94a3b8; font-size: 0.8rem;">Passive income collected while you were away:</p>
+            <div style="font-size: 2.2rem; font-weight: 900; color: var(--accent); margin: 15px 0;">
+                ❄️ <span id="offline-amt">0</span>
             </div>
-            <div class="energy-bar-bg">
-                <div class="energy-bar-fill" id="energy-bar"></div>
-            </div>
-        </div>
-
-        <div class="nav-menu">
-            <div class="nav-item" onclick="toggleShop()">🏪 Shop</div>
-            <div class="nav-item">🏆 Leaders</div>
-            <div class="nav-item">⚙️ Settings</div>
+            <button class="claim-btn" onclick="claimRewards()">CLAIM</button>
         </div>
     </div>
 
-    <div id="shop-modal">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h2>Negosyo Center</h2>
-            <button onclick="toggleShop()" style="background:none; color:white; border:none; font-size:1.5rem;">✕</button>
-        </div>
-        <div id="shop-list">
+    <div class="top-nav">
+        <div class="user-info">
+            <div class="user-avatar"></div>
+            <div style="text-align: left;">
+                <div id="username" style="font-weight: 900; font-size: 0.8rem;">PLAYER</div>
+                <div style="font-size: 0.6rem; color: var(--primary);">LVL 6 - GREEN DRAGON</div>
             </div>
+        </div>
+        <div style="background: var(--card); padding: 5px 12px; border-radius: 15px; font-size: 0.7rem; border: 1px solid var(--primary);">💎 0 +</div>
+    </div>
+
+    <div class="main-stats">
+        <div class="balance">❄️ <span id="balance">0</span></div>
+        <div class="level-container">
+            <div style="display:flex; justify-content:space-between"><span>Level 6/12</span><span>1.3M/5M</span></div>
+            <div class="level-bar-bg"><div class="level-bar-fill"></div></div>
+        </div>
+        <div class="sub-stats">
+            <div class="stat-card"><small>per tap</small><b id="ppc-text">+10</b></div>
+            <div class="stat-card"><small>per hour</small><b id="pps-text">+0</b></div>
+        </div>
+    </div>
+
+    <div class="game-area">
+        <img src="https://cdn-icons-png.flaticon.com/512/3753/3753443.png" class="main-img" onclick="tap(event)">
+    </div>
+
+    <div class="bottom-nav">
+        <div class="energy-box">
+            <span style="font-weight: 900; font-size: 0.8rem;">⚡ <span id="energy-num">1000</span></span>
+            <div class="energy-bar-bg"><div class="energy-bar-fill" id="energy-bar"></div></div>
+            <button style="background: #10b981; border:none; color:#fff; padding: 5px 10px; border-radius:10px; font-size:0.7rem; font-weight:bold;">UPGRADE</button>
+        </div>
+        <div class="menu-grid">
+            <div class="menu-btn active"><span>🐉</span>Dragon</div>
+            <div class="menu-btn"><span>📋</span>Tasks</div>
+            <div class="menu-btn"><span>⚔️</span>Battle</div>
+            <div class="menu-btn"><span>🃏</span>Cards</div>
+            <div class="menu-btn"><span>🏆</span>Ranks</div>
+        </div>
     </div>
 
     <script>
         let tele = window.Telegram.WebApp;
         tele.expand();
+        document.getElementById('username').innerText = (tele.initDataUnsafe.user?.first_name || "PLAYER").toUpperCase();
 
-        // Game State
-        let balance = 0;
-        let energy = 100;
-        let pps = 0; // Profit Per Second
-        let ppc = 10; // Profit Per Click
+        let balance = parseFloat(localStorage.getItem('ofw_bal')) || 0;
+        let pps = parseFloat(localStorage.getItem('ofw_pps')) || 0; 
+        let energy = 1000;
+        let lastLog = localStorage.getItem('ofw_time') || Date.now();
 
-        const shopItems = [
-            { name: "Online Seller Kit", cost: 100, income: 2, icon: "📱" },
-            { name: "Sari-sari Store", cost: 1000, income: 20, icon: "🏠" },
-            { name: "Food Cart", cost: 5000, income: 100, icon: "🍱" },
-            { name: "Jeepney Unit", cost: 25000, income: 600, icon: "🚐" },
-            { name: "Mini Hotel", cost: 100000, income: 3000, icon: "🏨" }
-        ];
-
-        // Clicker Event
-        document.getElementById('clicker').onclick = (e) => {
-            if (energy >= 1) {
-                balance += ppc;
-                energy -= 1;
-                updateDisplay();
-                tele.HapticFeedback.impactOccurred('medium');
-                showClickAnim(e);
-            } else {
-                tele.showAlert("Kailangan mo munang mag-rest!");
+        // Welcome back logic
+        window.onload = () => {
+            let diff = Math.floor((Date.now() - lastLog) / 1000);
+            if (diff > 30 && pps > 0) {
+                let offEarn = (pps / 3600) * diff;
+                document.getElementById('offline-amt').innerText = Math.floor(offEarn).toLocaleString();
+                document.getElementById('welcome-overlay').style.display = 'flex';
+                window.pending = offEarn;
             }
+            update();
         };
 
-        // Passive Income Loop
-        setInterval(() => {
-            if (pps > 0) {
-                balance += pps;
-                updateDisplay();
-            }
-        }, 1000);
+        function claimRewards() {
+            balance += window.pending;
+            document.getElementById('welcome-overlay').style.display = 'none';
+            save(); update();
+        }
 
-        // Energy Refill Loop
-        setInterval(() => {
-            if (energy < 100) {
-                energy += 1;
-                updateDisplay();
+        function tap(e) {
+            if (energy >= 1) {
+                balance += 10; energy -= 1;
+                spawn(e); update(); save();
+                tele.HapticFeedback.impactOccurred('medium');
             }
-        }, 2000);
+        }
 
-        function updateDisplay() {
+        function spawn(e) {
+            const t = document.createElement('div');
+            t.innerText = "+10";
+            t.style.cssText = `position:absolute; left:${e.pageX}px; top:${e.pageY}px; color:var(--primary); font-weight:900; animation:floatUp 0.6s forwards; pointer-events:none;`;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 600);
+        }
+
+        setInterval(() => { if(pps>0){ balance+=(pps/3600); update(); save(); } }, 1000);
+        setInterval(() => { if(energy<1000){ energy+=2; update(); } }, 1000);
+
+        function save() {
+            localStorage.setItem('ofw_bal', balance);
+            localStorage.setItem('ofw_pps', pps);
+            localStorage.setItem('ofw_time', Date.now());
+        }
+
+        function update() {
             document.getElementById('balance').innerText = Math.floor(balance).toLocaleString();
-            document.getElementById('energy-text').innerText = energy + "/100";
-            document.getElementById('energy-bar').style.width = energy + "%";
-            document.getElementById('pps-display').innerText = "Sahod: +₱" + pps.toLocaleString() + "/sec";
-            
-            // Rank System
-            if (balance > 1000000) document.getElementById('rank').innerText = "Global Tycoon 👑";
-            else if (balance > 100000) document.getElementById('rank').innerText = "Business Owner 🏢";
-            else if (balance > 10000) document.getElementById('rank').innerText = "Senior OFW 🛳️";
-        }
-
-        function toggleShop() {
-            const modal = document.getElementById('shop-modal');
-            modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
-            renderShop();
-        }
-
-        function renderShop() {
-            const list = document.getElementById('shop-list');
-            list.innerHTML = '';
-            shopItems.forEach((item, index) => {
-                list.innerHTML += `
-                    <div class="shop-item">
-                        <div style="text-align: left;">
-                            <div style="font-weight: bold;">${item.icon} ${item.name}</div>
-                            <small style="color: #10b981;">+₱${item.income}/sec</small><br>
-                            <small>Halaga: ₱${item.cost.toLocaleString()}</small>
-                        </div>
-                        <button class="buy-btn" onclick="buyItem(${index})">BILI</button>
-                    </div>
-                `;
-            });
-        }
-
-        function buyItem(index) {
-            let item = shopItems[index];
-            if (balance >= item.cost) {
-                balance -= item.cost;
-                pps += item.income;
-                item.cost = Math.floor(item.cost * 1.5); // Magmamahal ang presyo
-                updateDisplay();
-                renderShop();
-                tele.HapticFeedback.notificationOccurred('success');
-            } else {
-                tele.showAlert("Kulang ang iyong ipon!");
-            }
-        }
-
-        function showClickAnim(e) {
-            const anim = document.createElement('div');
-            anim.innerText = "+₱" + ppc;
-            anim.style.position = 'absolute';
-            anim.style.left = e.pageX + 'px';
-            anim.style.top = e.pageY + 'px';
-            anim.style.color = 'var(--primary)';
-            anim.style.fontWeight = 'bold';
-            anim.style.pointerEvents = 'none';
-            anim.style.animation = 'floatUp 0.5s ease-out forwards';
-            document.body.appendChild(anim);
-            setTimeout(() => anim.remove(), 500);
+            document.getElementById('pps-text').innerText = "+" + Math.floor(pps).toLocaleString();
+            document.getElementById('energy-num').innerText = energy;
+            document.getElementById('energy-bar').style.width = (energy/10) + "%";
         }
     </script>
-
-    <style>
-        @keyframes floatUp {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-100px); opacity: 0; }
-        }
-    </style>
 </body>
 </html>
