@@ -5,107 +5,314 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>OFW Global Tycoon</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #fbbf24;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+        }
+
         body {
-            background: #0f172a;
-            color: #f8fafc;
-            font-family: 'Inter', sans-serif;
-            text-align: center;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Poppins', sans-serif;
             margin: 0;
+            padding: 0;
+            text-align: center;
             user-select: none;
+            overflow: hidden;
         }
-        .container { padding: 20px; }
-        .score { font-size: 3rem; font-weight: bold; color: #fbbf24; margin: 20px 0; }
-        .rank { font-size: 1.2rem; color: #94a3b8; margin-bottom: 30px; }
-        
-        /* Ang Clicker Button */
-        .clicker-container {
-            position: relative;
-            display: inline-block;
-            margin-top: 20px;
+
+        .header {
+            padding: 20px;
+            background: rgba(30, 41, 59, 0.5);
+            border-bottom: 2px solid var(--card);
         }
-        .main-btn {
-            width: 220px;
-            height: 220px;
-            background: linear-gradient(145deg, #1e293b, #334155);
-            border: 8px solid #fbbf24;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 30px rgba(251, 191, 36, 0.3);
+
+        .balance-container {
+            margin: 20px 0;
+        }
+
+        .balance {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+        }
+
+        .income-info {
+            font-size: 0.9rem;
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        /* Clicker Area */
+        .clicker-area {
+            height: 45vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 5rem;
-            transition: transform 0.05s;
         }
-        .main-btn:active { transform: scale(0.92); }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 40px;
+        .main-btn {
+            width: 250px;
+            height: 250px;
+            background: linear-gradient(145deg, #1e293b, #334155);
+            border: 10px solid var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 50px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 6rem;
+            transition: transform 0.05s;
+            position: relative;
         }
-        .stat-card {
-            background: #1e293b;
-            padding: 15px;
+
+        .main-btn:active { transform: scale(0.9); }
+
+        /* Stats & Energy */
+        .stats-footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: var(--card);
+            border-radius: 25px 25px 0 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .energy-container {
+            margin-bottom: 20px;
+        }
+
+        .energy-bar-bg {
+            width: 100%;
+            height: 12px;
+            background: #334155;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .energy-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b);
+            width: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .nav-menu {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .nav-item {
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
             border-radius: 12px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .nav-item:active { border-color: var(--primary); }
+
+        /* Shop Modal */
+        #shop-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg);
+            z-index: 100;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .shop-item {
+            background: var(--card);
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             border: 1px solid #334155;
+        }
+
+        .buy-btn {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="rank" id="rank-display">Trainee OFW ✈️</div>
-        <div class="score">₱ <span id="balance">0</span></div>
 
-        <div class="clicker-container">
-            <div class="main-btn" id="click-target">💼</div>
+    <div class="header">
+        <div id="rank">Trainee OFW ✈️</div>
+    </div>
+
+    <div class="balance-container">
+        <div class="balance">₱ <span id="balance">0</span></div>
+        <div class="income-info" id="pps-display">Sahod: +₱0/sec</div>
+    </div>
+
+    <div class="clicker-area">
+        <div class="main-btn" id="clicker">💼</div>
+    </div>
+
+    <div class="stats-footer">
+        <div class="energy-container">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+                <span>Lakas (Energy)</span>
+                <span id="energy-text">100/100</span>
+            </div>
+            <div class="energy-bar-bg">
+                <div class="energy-bar-fill" id="energy-bar"></div>
+            </div>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <small>ENERGY</small>
-                <div id="energy">100/100</div>
-            </div>
-            <div class="stat-card">
-                <small>DAILY PROFIT</small>
-                <div style="color: #22c55e;">+₱0</div>
-            </div>
+        <div class="nav-menu">
+            <div class="nav-item" onclick="toggleShop()">🏪 Shop</div>
+            <div class="nav-item">🏆 Leaders</div>
+            <div class="nav-item">⚙️ Settings</div>
         </div>
+    </div>
+
+    <div id="shop-modal">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Negosyo Center</h2>
+            <button onclick="toggleShop()" style="background:none; color:white; border:none; font-size:1.5rem;">✕</button>
+        </div>
+        <div id="shop-list">
+            </div>
     </div>
 
     <script>
         let tele = window.Telegram.WebApp;
         tele.expand();
 
+        // Game State
         let balance = 0;
         let energy = 100;
+        let pps = 0; // Profit Per Second
+        let ppc = 10; // Profit Per Click
 
-        const balanceEl = document.getElementById('balance');
-        const energyEl = document.getElementById('energy');
-        const target = document.getElementById('click-target');
-        const rankEl = document.getElementById('rank-display');
+        const shopItems = [
+            { name: "Online Seller Kit", cost: 100, income: 2, icon: "📱" },
+            { name: "Sari-sari Store", cost: 1000, income: 20, icon: "🏠" },
+            { name: "Food Cart", cost: 5000, income: 100, icon: "🍱" },
+            { name: "Jeepney Unit", cost: 25000, income: 600, icon: "🚐" },
+            { name: "Mini Hotel", cost: 100000, income: 3000, icon: "🏨" }
+        ];
 
-        target.onclick = () => {
-            if (energy > 0) {
-                balance += 50;
+        // Clicker Event
+        document.getElementById('clicker').onclick = (e) => {
+            if (energy >= 1) {
+                balance += ppc;
                 energy -= 1;
                 updateDisplay();
                 tele.HapticFeedback.impactOccurred('medium');
+                showClickAnim(e);
             } else {
-                tele.showAlert("Pagod ka na, kabayan! Pahinga muna para mag-refill ang energy.");
+                tele.showAlert("Kailangan mo munang mag-rest!");
             }
         };
 
+        // Passive Income Loop
+        setInterval(() => {
+            if (pps > 0) {
+                balance += pps;
+                updateDisplay();
+            }
+        }, 1000);
+
+        // Energy Refill Loop
+        setInterval(() => {
+            if (energy < 100) {
+                energy += 1;
+                updateDisplay();
+            }
+        }, 2000);
+
         function updateDisplay() {
-            balanceEl.innerText = balance.toLocaleString();
-            energyEl.innerText = `${energy}/100`;
+            document.getElementById('balance').innerText = Math.floor(balance).toLocaleString();
+            document.getElementById('energy-text').innerText = energy + "/100";
+            document.getElementById('energy-bar').style.width = energy + "%";
+            document.getElementById('pps-display').innerText = "Sahod: +₱" + pps.toLocaleString() + "/sec";
             
-            // Basic Leveling
-            if (balance > 5000) rankEl.innerText = "Senior OFW 🛳️";
-            if (balance > 20000) rankEl.innerText = "Global Investor 🏢";
+            // Rank System
+            if (balance > 1000000) document.getElementById('rank').innerText = "Global Tycoon 👑";
+            else if (balance > 100000) document.getElementById('rank').innerText = "Business Owner 🏢";
+            else if (balance > 10000) document.getElementById('rank').innerText = "Senior OFW 🛳️";
+        }
+
+        function toggleShop() {
+            const modal = document.getElementById('shop-modal');
+            modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+            renderShop();
+        }
+
+        function renderShop() {
+            const list = document.getElementById('shop-list');
+            list.innerHTML = '';
+            shopItems.forEach((item, index) => {
+                list.innerHTML += `
+                    <div class="shop-item">
+                        <div style="text-align: left;">
+                            <div style="font-weight: bold;">${item.icon} ${item.name}</div>
+                            <small style="color: #10b981;">+₱${item.income}/sec</small><br>
+                            <small>Halaga: ₱${item.cost.toLocaleString()}</small>
+                        </div>
+                        <button class="buy-btn" onclick="buyItem(${index})">BILI</button>
+                    </div>
+                `;
+            });
+        }
+
+        function buyItem(index) {
+            let item = shopItems[index];
+            if (balance >= item.cost) {
+                balance -= item.cost;
+                pps += item.income;
+                item.cost = Math.floor(item.cost * 1.5); // Magmamahal ang presyo
+                updateDisplay();
+                renderShop();
+                tele.HapticFeedback.notificationOccurred('success');
+            } else {
+                tele.showAlert("Kulang ang iyong ipon!");
+            }
+        }
+
+        function showClickAnim(e) {
+            const anim = document.createElement('div');
+            anim.innerText = "+₱" + ppc;
+            anim.style.position = 'absolute';
+            anim.style.left = e.pageX + 'px';
+            anim.style.top = e.pageY + 'px';
+            anim.style.color = 'var(--primary)';
+            anim.style.fontWeight = 'bold';
+            anim.style.pointerEvents = 'none';
+            anim.style.animation = 'floatUp 0.5s ease-out forwards';
+            document.body.appendChild(anim);
+            setTimeout(() => anim.remove(), 500);
         }
     </script>
+
+    <style>
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-100px); opacity: 0; }
+        }
+    </style>
 </body>
 </html>
