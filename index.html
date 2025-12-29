@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OFW Global Tycoon</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background: #0f172a;
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            margin: 0;
+            user-select: none;
+        }
+        .container { padding: 20px; }
+        .score { font-size: 3rem; font-weight: bold; color: #fbbf24; margin: 20px 0; }
+        .rank { font-size: 1.2rem; color: #94a3b8; margin-bottom: 30px; }
+        
+        /* Ang Clicker Button */
+        .clicker-container {
+            position: relative;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .main-btn {
+            width: 220px;
+            height: 220px;
+            background: linear-gradient(145deg, #1e293b, #334155);
+            border: 8px solid #fbbf24;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            transition: transform 0.05s;
+        }
+        .main-btn:active { transform: scale(0.92); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 40px;
+        }
+        .stat-card {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="rank" id="rank-display">Trainee OFW ✈️</div>
+        <div class="score">₱ <span id="balance">0</span></div>
+
+        <div class="clicker-container">
+            <div class="main-btn" id="click-target">💼</div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <small>ENERGY</small>
+                <div id="energy">100/100</div>
+            </div>
+            <div class="stat-card">
+                <small>DAILY PROFIT</small>
+                <div style="color: #22c55e;">+₱0</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tele = window.Telegram.WebApp;
+        tele.expand();
+
+        let balance = 0;
+        let energy = 100;
+
+        const balanceEl = document.getElementById('balance');
+        const energyEl = document.getElementById('energy');
+        const target = document.getElementById('click-target');
+        const rankEl = document.getElementById('rank-display');
+
+        target.onclick = () => {
+            if (energy > 0) {
+                balance += 50;
+                energy -= 1;
+                updateDisplay();
+                tele.HapticFeedback.impactOccurred('medium');
+            } else {
+                tele.showAlert("Pagod ka na, kabayan! Pahinga muna para mag-refill ang energy.");
+            }
+        };
+
+        function updateDisplay() {
+            balanceEl.innerText = balance.toLocaleString();
+            energyEl.innerText = `${energy}/100`;
+            
+            // Basic Leveling
+            if (balance > 5000) rankEl.innerText = "Senior OFW 🛳️";
+            if (balance > 20000) rankEl.innerText = "Global Investor 🏢";
+        }
+    </script>
+</body>
+</html>
