@@ -5,55 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #0f0f1b; color: white; font-family: 'Orbitron', sans-serif; margin: 0; overflow: hidden; text-transform: uppercase; }
-        .arena { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: url('https://wallpaperaccess.com/full/1267160.jpg') center/cover; }
+        body { background: #0b0b14; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
+        .arena { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, #222, #000); }
         
-        .battle-field { display: flex; width: 100%; justify-content: space-around; align-items: center; margin-bottom: 50px; }
+        .battle-field { display: flex; width: 100%; justify-content: space-around; align-items: center; margin-bottom: 30px; }
         
         /* Splinterlands Card Style */
-        .card { width: 130px; height: 190px; border: 4px solid #444; border-radius: 10px; position: relative; background: #222; transition: 0.3s; box-shadow: 0 0 15px rgba(0,0,0,0.8); }
-        .card.active { border-color: #00ff00; transform: scale(1.1); box-shadow: 0 0 20px #00ff00; }
-        .card.hit { animation: hit 0.3s; }
+        .card { width: 140px; height: 200px; border: 4px solid #gold; border-radius: 15px; position: relative; background: #222; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.5); transition: 0.3s; }
+        .card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+        .card.active { transform: scale(1.1) translateY(-10px); border-color: #00ff00; box-shadow: 0 0 30px #00ff00; }
+        .card.hit { animation: shake 0.3s; border-color: #ff0000; }
         
-        .hp-bar { width: 100%; height: 10px; background: #550000; position: absolute; top: -20px; border-radius: 5px; overflow: hidden; }
-        .hp-fill { height: 100%; background: #ff0000; transition: 0.5s; }
+        .hp-bar { width: 90%; height: 10px; background: #444; position: absolute; top: 10px; left: 5%; border-radius: 5px; z-index: 10; }
+        .hp-fill { height: 100%; background: linear-gradient(90deg, #ff0000, #ff6666); width: 100%; transition: 0.4s; }
         
-        .stats { position: absolute; bottom: 5px; width: 100%; display: flex; justify-content: space-around; font-size: 12px; font-weight: bold; }
-        .stat { background: rgba(0,0,0,0.7); padding: 2px 5px; border-radius: 3px; }
+        .name-tag { position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.8); padding: 5px 0; font-size: 12px; font-weight: bold; text-align: center; color: gold; }
+
+        #log { width: 85%; height: 80px; background: rgba(0,0,0,0.5); border-radius: 10px; padding: 10px; font-size: 11px; overflow-y: auto; color: #ccc; border: 1px solid #333; }
         
-        #log { height: 100px; width: 90%; background: rgba(0,0,0,0.6); border: 1px solid #444; padding: 10px; overflow-y: auto; font-size: 12px; color: #aaa; }
-        
-        @keyframes hit { 0% { transform: translateX(0); } 25% { transform: translateX(-10px); } 50% { transform: translateX(10px); } 100% { transform: translateX(0); } }
-        
-        .btn-start { background: #e67e22; border: none; padding: 15px 30px; color: white; font-weight: bold; border-radius: 5px; margin-top: 20px; cursor: pointer; }
+        .btn-fight { margin-top: 20px; padding: 15px 40px; background: linear-gradient(#ff8c00, #ff4500); border: none; border-radius: 50px; color: white; font-weight: bold; font-size: 18px; box-shadow: 0 5px 15px rgba(255,69,0,0.4); cursor: pointer; }
+
+        @keyframes shake { 0% { transform: translate(5px, 0); } 50% { transform: translate(-5px, 0); } 100% { transform: translate(0, 0); } }
     </style>
 </head>
 <body>
     <div class="arena">
         <div class="battle-field">
             <div id="card1" class="card">
-                <div class="hp-bar"><div id="hp1" class="hp-fill" style="width: 100%;"></div></div>
-                <div id="n1" style="padding-top: 50px; font-size: 14px;">CARD 1</div>
-                <div class="stats">
-                    <div class="stat" style="color: #ff4d4d;">⚔️ 5</div>
-                    <div class="stat" style="color: #4da6ff;">🛡️ 2</div>
-                </div>
+                <div class="hp-bar"><div id="hp1" class="hp-fill"></div></div>
+                <img id="img1" src="" onerror="this.src='https://via.placeholder.com/140x200?text=NBA+PLAYER'">
+                <div class="name-tag" id="n1">PLAYER 1</div>
             </div>
-
-            <div style="font-size: 24px; font-weight: bold; color: gold;">VS</div>
-
+            <div style="font-weight: bold; color: gold; font-size: 20px;">VS</div>
             <div id="card2" class="card">
-                <div class="hp-bar"><div id="hp2" class="hp-fill" style="width: 100%;"></div></div>
-                <div id="n2" style="padding-top: 50px; font-size: 14px;">CARD 2</div>
-                <div class="stats">
-                    <div class="stat" style="color: #ff4d4d;">⚔️ 4</div>
-                    <div class="stat" style="color: #4da6ff;">🛡️ 3</div>
-                </div>
+                <div class="hp-bar"><div id="hp2" class="hp-fill"></div></div>
+                <img id="img2" src="" onerror="this.src='https://via.placeholder.com/140x200?text=NBA+PLAYER'">
+                <div class="name-tag" id="n2">PLAYER 2</div>
             </div>
         </div>
-
-        <div id="log">READY FOR BATTLE...</div>
-        <button id="fight-btn" class="btn-start" onclick="processBattle()">AUTO BATTLE</button>
+        <div id="log">> STANDBY FOR CLASH...</div>
+        <button id="fight-btn" class="btn-fight" onclick="startBattle()">START AUTO-BATTLE</button>
     </div>
 
     <script>
@@ -61,60 +52,55 @@
         tg.expand();
 
         const urlParams = new URLSearchParams(window.location.search);
-        document.getElementById('n1').innerText = urlParams.get('p1') || "HERO";
-        document.getElementById('n2').innerText = urlParams.get('p2') || "MONSTER";
+        const p1Name = urlParams.get('p1') || "Hero";
+        const p2Name = urlParams.get('p2') || "Enemy";
+
+        document.getElementById('n1').innerText = p1Name;
+        document.getElementById('n2').innerText = p2Name;
+
+        // Load Images (Dapat may images ka sa GitHub na kapangalan ng Player)
+        document.getElementById('img1').src = p1Name.toLowerCase() + ".png";
+        document.getElementById('img2').src = p2Name.toLowerCase() + ".png";
 
         let h1 = 100, h2 = 100;
 
-        function addLog(text) {
-            const log = document.getElementById('log');
-            log.innerHTML += `<div>> ${text}</div>`;
-            log.scrollTop = log.scrollHeight;
-        }
-
-        async function processBattle() {
+        async function startBattle() {
             document.getElementById('fight-btn').style.display = 'none';
-            addLog("BATTLE STARTED!");
-
-            while (h1 > 0 && h2 > 0) {
-                // Turn Player 1
-                await attack('card1', 'card2', 20);
+            const log = document.getElementById('log');
+            
+            while(h1 > 0 && h2 > 0) {
+                // Player 1 Attacks
+                await playAction('card1', 'card2', 20);
                 h2 -= 20;
-                updateBars();
-                if (h2 <= 0) break;
+                document.getElementById('hp2').style.width = h2 + "%";
+                log.innerHTML += `<div>> ${p1Name} hits for 20 DMG!</div>`;
+                if(h2 <= 0) break;
 
-                // Turn Player 2
-                await new Promise(r => setTimeout(r, 800));
-                await attack('card2', 'card1', 15);
+                await new Promise(r => setTimeout(r, 600));
+
+                // Player 2 Attacks
+                await playAction('card2', 'card1', 15);
                 h1 -= 15;
-                updateBars();
+                document.getElementById('hp1').style.width = h1 + "%";
+                log.innerHTML += `<div>> ${p2Name} counters for 15 DMG!</div>`;
             }
 
-            addLog(h1 > 0 ? "PLAYER 1 WINS!" : "PLAYER 2 WINS!");
-            setTimeout(() => { tg.close(); }, 3000);
+            log.innerHTML += `<div style="color:gold">> BATTLE ENDED!</div>`;
+            setTimeout(() => { tg.close(); }, 2500);
         }
 
-        function updateBars() {
-            document.getElementById('hp1').style.width = h1 + "%";
-            document.getElementById('hp2').style.width = h2 + "%";
-        }
-
-        function attack(attackerId, targetId, damage) {
+        function playAction(atkId, defId, dmg) {
             return new Promise(resolve => {
-                const attacker = document.getElementById(attackerId);
-                const target = document.getElementById(targetId);
-                attacker.classList.add('active');
-                
+                document.getElementById(atkId).classList.add('active');
                 setTimeout(() => {
-                    target.classList.add('hit');
-                    if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-                    addLog(`DEALT ${damage} DAMAGE`);
+                    document.getElementById(defId).classList.add('hit');
+                    if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
                     setTimeout(() => {
-                        attacker.classList.remove('active');
-                        target.classList.remove('hit');
+                        document.getElementById(atkId).classList.remove('active');
+                        document.getElementById(defId).classList.remove('hit');
                         resolve();
-                    }, 300);
-                }, 400);
+                    }, 200);
+                }, 300);
             });
         }
     </script>
